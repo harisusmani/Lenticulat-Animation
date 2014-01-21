@@ -1,6 +1,8 @@
+// Muhammad Haris Usmani - 1/21/2014
+// http://harisusmani.com
+
 // Credits to Prof. Golan Levin for Starter Code & Export Frame Option
-
-
+// http://golancourses.net/2014/assignments/project-1/lenticular-animation/
  
 //===================================================
 // Global variables. 
@@ -68,62 +70,87 @@ void polygon(int n, float cx, float cy, float r)
 //===================================================
 void renderMyDesign (float percent) {
  
-  // This is an example of a function that renders a temporally looping design. 
-  // It takes a "percent", between 0 and 1, indicating where we are in the loop. 
-  // This example uses two different graphical techniques. 
-  // Use or delete whatever you prefer from this example. 
-  // Remember to SKETCH FIRST!
- 
   //----------------------
   // here, I set the background and some other graphical properties
   background (0,10,30);
   smooth(); 
   stroke (0, 0, 0); 
-  strokeWeight (2); 
+  strokeWeight (3); 
  
   //----------------------
   // Here, I assign some handy variables. 
   float cx = width/2;
   float cy = height/2;
   
-  float stage1=0.65;
-  float stage2=0.80;
+  // Diving Time between Stages:
+  float stage1=0.3;
+  float stage2=0.5;
+  float stage3=0.7;
+  
   //----------------------
+  // Outer Circles: Static Art
+  fill (100); 
+  float Big_R=350/2; //Outer Circle Radius
+  ellipse (cx, cy, Big_R*2, Big_R*2); //Outer Circle
+  //fill (ellipseColor, ellipseColor, ellipseColor);
+  fill (80);  
+  float R=150; //Inner Circle Radius
+  ellipse (cx, cy, 2*R, 2*R); //Inner Circle
+  
+  float armAngle=0;
+  for (int i=0; i < 6; i++) { //Lens Screws in Light Grey
+    armAngle=armAngle+60;
+    float px = (R-(R-Big_R)/2)*cos(armAngle/180*PI); 
+    float py = (R-(R-Big_R)/2)*sin(armAngle/180*PI); 
+    fill(180); 
+    ellipse (cx+px, cy+py, (R-Big_R)/2, (R-Big_R)/2);
+  }
+  
+  //Dynamic Graphics:
+  
   pushMatrix(); 
   translate (cx, cy);
-  float rotatingShapeAngle =  percent * TWO_PI; //* 2/5;//-0.25;
-  rotate (rotatingShapeAngle);
+  float radius = 0;
+  int nSpokes = 6;
   
-  if(percent<stage1) //Stage 1, Prepare
+  if(percent<stage1) //Stage 1, Say Smile! -- Click
   { 
-  fill (255, map(percent,0,stage1,179,0), map(percent,0,stage1,10,0));
-  polygon(3+(int)(sin(PI*percent)*10), random(30), random(30), map(percent, 0, stage1, 80, 45));
-  } 
-  else if(percent<stage2) //Stage2, Burst the shape!
-  { 
-    //fill(255, 128, 90, 255);
-    fill (255, 128, 90, map(percent,stage1, 1, 255, 0));
-    polygon(3+(int)(sin(PI*percent)*30),0,0, map(percent,stage1,1,45,width*1.8));
+    radius = 50;
+    fill (256, map(percent,stage1/2,stage1,256,0), map(percent,stage1/2,stage1,256,0));
+    polygon(nSpokes, 0, 0, radius);
   }
-  else  //Stage 3, Cycle the GIF
+  else if(percent<stage2) //Stage2, Burst Open Shutter
+  { 
+    radius = (float)map(percent,stage1,stage2,50,130);
+    fill (0, 0, 0);
+    polygon(nSpokes, 0, 0, radius);
+  }
+  else if (percent<stage3) //Stage3, Adjust/Focus
   {
-    fill (255, 128, 90, map(percent,stage2, 1, 0, 255));
-    polygon(3,0,0, map(percent,stage2,1,0,80));
+    radius = (float)map(percent,stage2,stage3,130,25);
+    fill (0, 0, 0);
+    polygon(nSpokes, 0, 0, radius);
   }
-    
-  //polygon(1+(int)(sin(PI*percent)*10), 0, 0, 80);
-  //ellipse (0, 0, 80, 80);
-  //rect (-40, -40, 80, 80);
+  else
+  {
+    radius = (float)map(percent,stage3,1,25,50); //Stage 4, Fine Focus & Loop GIF
+    fill (0, 0, 0);
+    polygon(nSpokes, 0, 0, radius);
+  }
+
   popMatrix();
- 
-  //----------------------
-  // Here's a pulsating ellipse
-  /*
-  float ellipsePulse = cos ( percent * TWO_PI); 
-  float ellipseW = map(ellipsePulse, -1, 1, 20.0, 80.0); 
-  float ellipseH = map(ellipsePulse, -1, 1, 80.0, 20.0); 
-  float ellipseColor = map(ellipsePulse, -1, 1, 0, 255); 
-  fill (ellipseColor, ellipseColor, ellipseColor); 
-  ellipse (340, cy, ellipseW, ellipseH); 
-  */
+  
+  //-- SHUTTER LEAVES of Exact Length, give Illusion of Rotation 
+  float outRadius=sqrt(pow(R,2)-pow((radius*cos(radians(180/nSpokes))),2))-(radius*sin(radians(180/nSpokes))); 
+  //Chord Length Formula: http://www.mathopenref.com/chord.html
+  armAngle = 0;
+  for (int i=0; i < nSpokes; i++) {
+    armAngle = armAngle + 360/nSpokes;
+    float px = cx + radius*cos(armAngle/180*PI); 
+    float py = cy + radius*sin(armAngle/180*PI); 
+    fill(255); 
+    float disp_x= outRadius*cos((armAngle-360/nSpokes)/180*PI); //Displacement in X
+    float disp_y= outRadius*sin((armAngle-360/nSpokes)/180*PI);  //Displacement in Y
+    line(px, py, px+disp_x, py+disp_y);
+  }
 }
